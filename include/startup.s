@@ -36,9 +36,9 @@ LMOUSE	MACRO
            ENDM
 
 BLTWAIT	MACRO
-           tst        DMACONR(a6)
+           btst       #DMAB_BLTDONE-8,DMACONR(a6)
 \1
-           btst       #6,DMACONR(a6)
+           btst       #DMAB_BLTDONE-8,DMACONR(a6)
            bne.s      \1
            ENDM
 
