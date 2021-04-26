@@ -21,7 +21,7 @@
                 "emulator": "${workspaceFolder}/bin/fs-uae",
             },
             "emulatorWorkingDir": "${workspaceFolder}/bin",
-            "program": "${workspaceFolder}/uae/dh0/blit1",
+            "program": "${workspaceFolder}/uae/dh0/prog",
             "options": [
                 "--chip_memory=2048",
                 "--fast_memory=4096",
