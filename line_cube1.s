@@ -18,8 +18,8 @@
 * x' = z*sin q + x*cos q
 * y' = y
 *
-* x' = x * d/z
-* y' = y * d/z
+* x' = x / z + 1
+* y' = y / z + 1
 ***********************************************************
 
 			incdir		"include"
@@ -56,7 +56,7 @@ wait:	WAITVB2	wait
 
 ***********************************************************
 *
-DV	equ	10
+DV	equ	1
 
 draw_cube:
 			movem.l		d0-d7/a0-a6,-(sp)
@@ -68,10 +68,7 @@ draw_cube:
 			lea			CUSTOM,a6
 
 ; d0=x1, d1=y1, d2=x2, d3=y2, d4=width, a0=aptr
-; x' = x * d/z
-; y' = y * d/z
 
-			move.l		buf2,a0
 			lea			lines,a1
 			lea			points,a2
 			;vertcount
@@ -80,57 +77,57 @@ draw_cube:
 			move.w		(a1)+,d7
 			; vert1
 dverts		move.w		(a1)+,d5
-			mulu		#6,d5
-			; cmp.w		#0,d5
-			; beq			.dv1
-			; add.w		d5,d5
-			; add.w		d5,d5
-			; add.w		d5,d5
+			lsl.w		#3,d5
 .dv1		move.w		(0,a2,d5.w),d0
 			move.w		(2,a2,d5.w),d1
-			;move.w		(4,a2,d5.w),d2
-
-			; move.l		#DV,d3
-			; divs.w		d2,d3
-			; muls.w		d3,d0
-			; move.l		#DV,d3
-			; divs.w		d1,d3
-			; muls.w		d3,d1
+			move.w		(4,a2,d5.w),d4
 
 			; vert2
 			move.w		(a1)+,d5
-			mulu		#6,d5
-			; cmp.w		#0,d5
-			; beq			.dv2
-			; add.w		d5,d5
-			; add.w		d5,d5
-			; add.w		d5,d5
+			lsl.w		#3,d5
 .dv2		move.w		(0,a2,d5.w),d2
 			move.w		(2,a2,d5.w),d3
-			;move.w		(4,a2,d5.w),d5
-			
-			; move.l		#DV,d6
-			; divs.w		d3,d6
-			; muls.w		d6,d3
-			; move.l		#DV,d6
-			; divs.w		d4,d6
-			; muls.w		d6,d4
+			move.w		(4,a2,d5.w),d5
 
-			asl.w		#2,d0
-			asl.w		#2,d1
-			asl.w		#2,d2
-			asl.w		#2,d3
-			and.l		#$0000ffff,d0
-			and.l		#$0000ffff,d1
-			and.l		#$0000ffff,d2
-			and.l		#$0000ffff,d3
+			asl.w		#6,d0
+			asl.w		#6,d1
+			asl.w		#6,d2
+			asl.w		#6,d3
+			asl.w		#6,d4
+			asl.w		#6,d5
+
+			; perspective
+
+			; move.w		d4,d6
+			; exg			d0,d4
+			; divs		d4,d0
+			; exg			d1,d6
+			; divs		d6,d1
+
+			; move.w		d5,d6
+			; exg			d2,d5
+			; divs		d5,d2
+			; exg			d3,d6
+			; divs		d6,d3
+
+			; asr.w		#3,d0
+			; asr.w		#3,d1
+			; asr.w		#3,d2
+			; asr.w		#3,d3
 
 			add.w		#320/2,d0
 			add.w		#320/2,d2
 			add.w		#256/2,d1
 			add.w		#256/2,d3
 
+			; mask
+			and.l		#$0000ffff,d0
+			and.l		#$0000ffff,d1
+			and.l		#$0000ffff,d2
+			and.l		#$0000ffff,d3
+
 			move.l		#40,d4
+			move.l		buf2,a0
 
 			bsr			blit_line
 
@@ -185,7 +182,7 @@ points:		PointXYZ	-1, -1, -1
 			PointXYZ	1,  1,  1
 			PointXYZ	-1,  1,  1
 
-lines:		VertCount	2-1
+lines:		VertCount	12-1
 			VertAB		0,3
 			VertAB		3,2
 			VertAB		2,1

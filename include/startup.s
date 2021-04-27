@@ -52,7 +52,7 @@ CLRS		MACRO
 			ENDM
 
 PointXYZ	MACRO
-			dc.w		\1, \2, \3
+			dc.w		\1, \2, \3, 0
 			ENDM
 
 VertAB		MACRO
