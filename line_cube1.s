@@ -56,7 +56,51 @@ wait:	WAITVB2	wait
 
 ***********************************************************
 *
-DV	equ	1
+rotate_cube:
+			;d0=x1, d1=y1, d4=z1, d2=x2, d3=y2, d5=z2, a3=sin
+			; z' = z*cos q - x*sin q
+			; x' = z*sin q + x*cos q
+			lea			coords+10,a4
+			lea			coords2,a5
+			move.w		d1,(2,a5)
+			move.w		d3,(8,a5)
+
+			movem.w		d0-d5,-(a4)
+			move.l		#0,d5
+			move.b		sinp,d5
+			
+			move.w		(4,a4),d3
+			move.w		(a4),d0
+			SinScale	d0,d5,a3
+			CosScale	d3,d5,a3
+			;d0 = z'
+			sub.w		d3,d0
+			move.w		d0,(4,a5)
+
+			move.w		(a4),d0
+			SinScale	d3,d5,a3
+			CosScale	d0,d5,a3
+			add.w		d3,d0
+			move.w		d0,(a5)
+
+			move.w		(10,a4),d3
+			move.w		(6,a4),d0
+			SinScale	d0,d5,a3
+			CosScale	d3,d5,a3
+			;d0 = z'
+			sub.w		d3,d0
+			move.w		d0,(10,a5)
+
+			move.w		(6,a4),d0
+			SinScale	d3,d5,a3
+			CosScale	d0,d5,a3
+			add.w		d3,d0
+			move.w		d0,(6,a5)
+			rts
+***********************************************************
+*
+SL	equ	6
+MAX	equ	50
 
 draw_cube:
 			movem.l		d0-d7/a0-a6,-(sp)
@@ -67,8 +111,6 @@ draw_cube:
 
 			lea			CUSTOM,a6
 
-; d0=x1, d1=y1, d2=x2, d3=y2, d4=width, a0=aptr
-
 			lea			lines,a1
 			lea			points,a2
 			;vertcount
@@ -77,54 +119,46 @@ draw_cube:
 			move.w		(a1)+,d7
 			; vert1
 dverts		move.w		(a1)+,d5
-			lsl.w		#3,d5
 .dv1		move.w		(0,a2,d5.w),d0
 			move.w		(2,a2,d5.w),d1
 			move.w		(4,a2,d5.w),d4
 
 			; vert2
 			move.w		(a1)+,d5
-			lsl.w		#3,d5
 .dv2		move.w		(0,a2,d5.w),d2
 			move.w		(2,a2,d5.w),d3
 			move.w		(4,a2,d5.w),d5
 
-			asl.w		#6,d0
-			asl.w		#6,d1
-			asl.w		#6,d2
-			asl.w		#6,d3
-			asl.w		#6,d4
-			asl.w		#6,d5
+			lsl.w		#SL,d0
+			lsl.w		#SL,d1
+			lsl.w		#SL,d2
+			lsl.w		#SL,d3
+			lsl.w		#SL,d4
+			lsl.w		#SL,d5
 
+			;lea			sin2,a3
+			;bsr			rotate_cube
+			;lea			coords2,a5
+			;movem.w		(a5)+,d0-d5
 			; perspective
 
-			; move.w		d4,d6
-			; exg			d0,d4
-			; divs		d4,d0
-			; exg			d1,d6
-			; divs		d6,d1
-
-			; move.w		d5,d6
-			; exg			d2,d5
-			; divs		d5,d2
-			; exg			d3,d6
-			; divs		d6,d3
-
-			; asr.w		#3,d0
-			; asr.w		#3,d1
-			; asr.w		#3,d2
-			; asr.w		#3,d3
-
-			add.w		#320/2,d0
-			add.w		#320/2,d2
-			add.w		#256/2,d1
-			add.w		#256/2,d3
-
-			; mask
 			and.l		#$0000ffff,d0
 			and.l		#$0000ffff,d1
 			and.l		#$0000ffff,d2
 			and.l		#$0000ffff,d3
+			and.l		#$0000ffff,d4
+			and.l		#$0000ffff,d5
+
+			; perspective
+			PERSP2D		d0,d1,d4
+			PERSP2D		d2,d3,d5
+
+			and.l		#$0000ffff,d0
+			and.l		#$0000ffff,d1
+			and.l		#$0000ffff,d2
+			and.l		#$0000ffff,d3			
+
+			; d0=x1, d1=y1, d2=x2, d3=y2, d4=width, a0=aptr
 
 			move.l		#40,d4
 			move.l		buf2,a0
@@ -149,7 +183,7 @@ dverts		move.w		(a1)+,d5
 *
 
 debug:		dc.l		0
-sinstp:		dc.b		0
+sinp:		dc.b		0
 			even
 
 coplst:		dc.w		BPLCON0,$1200	
@@ -173,14 +207,17 @@ buf1:		dc.l		0
 buf2:		dc.l		0
 tmp:		dc.l		0
 
-points:		PointXYZ	-1, -1, -1
-			PointXYZ	1, -1, -1
-			PointXYZ	1,  1, -1
-			PointXYZ	-1,  1, -1
-			PointXYZ	-1, -1,  1
-			PointXYZ	1, -1,  1
-			PointXYZ	1,  1,  1
-			PointXYZ	-1,  1,  1
+coords:		dc.w		0,0,0,0,0,0
+coords2:	dc.w		0,0,0,0,0,0
+
+points:		PointXYZ	-MAX, -MAX, -MAX
+			PointXYZ	MAX, -MAX, -MAX
+			PointXYZ	MAX,  MAX, -MAX
+			PointXYZ	-MAX,  MAX, -MAX
+			PointXYZ	-MAX, -MAX,  MAX
+			PointXYZ	MAX, -MAX,  MAX
+			PointXYZ	MAX,  MAX,  MAX
+			PointXYZ	-MAX,  MAX,  MAX
 
 lines:		VertCount	12-1
 			VertAB		0,3

@@ -51,17 +51,52 @@ CLRS		MACRO
 			dbra		d7,.s_l\@
 			ENDM
 
+PERSP2D:MACRO			
+			;final projection from world to screen coords
+			ext.l		\1
+			ext.l		\2
+			neg.w		\3																	;world +z is forward,screen perspective is away
+			asr.w		#8,\3																;this scaling
+			add.w		#78,\3																;and eye Z determines Field of View.
+			divs		\3,\1
+			divs		\3,\2
+			add.w		#320/2,\1															;center horizontally on the screen
+			add.w		#256/2,\2															;center vertically
+			ENDM
+
+
 PointXYZ	MACRO
-			dc.w		\1, \2, \3, 0
+			dc.w		\1, \2, \3
 			ENDM
 
 VertAB		MACRO
-			dc.w		\1, \2
+			dc.w		\1*6, \2*6
 			ENDM
 
 VertCount	MACRO
 			dc.w		\1
 			ENDM
+
+			;\1 = x||y; \2 = step, \3 = list
+SinScale	MACRO		\1, \2, \3
+			move.l		#0,d6
+			move.b		(\3,\2),d6
+			;lsl.w		#4,d6
+			muls		d6,\1
+			;add.l		\1,\1
+			;swap		\1
+			ENDM
+
+			;\1 = x||y; \2 = step, \3 = list
+CosScale	MACRO		\1, \2, \3
+			move.l		#0,d6
+			move.b		(128,\3,\2),d6
+			;lsl.w		#4,d6
+			muls		d6,\1
+			;add.l		\1,\1
+			;swap		\1
+			ENDM
+
 ***********************************************************
 * START
 *
