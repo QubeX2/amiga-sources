@@ -56,46 +56,11 @@ wait:	WAITVB2	wait
 
 ***********************************************************
 *
-rotate_cube:
-			;d0=x1, d1=y1, d4=z1, d2=x2, d3=y2, d5=z2, a3=sin
-			; z' = z*cos q - x*sin q
+rotate_y:
+			;d0=x, d1=y, d2=z
+			; z' = z*cos -  x*sin
 			; x' = z*sin q + x*cos q
-			lea			coords+10,a4
-			lea			coords2,a5
-			move.w		d1,(2,a5)
-			move.w		d3,(8,a5)
-
-			movem.w		d0-d5,-(a4)
-			move.l		#0,d5
-			move.b		sinp,d5
-			
-			move.w		(4,a4),d3
-			move.w		(a4),d0
-			SinScale	d0,d5,a3
-			CosScale	d3,d5,a3
-			;d0 = z'
-			sub.w		d3,d0
-			move.w		d0,(4,a5)
-
-			move.w		(a4),d0
-			SinScale	d3,d5,a3
-			CosScale	d0,d5,a3
-			add.w		d3,d0
-			move.w		d0,(a5)
-
-			move.w		(10,a4),d3
-			move.w		(6,a4),d0
-			SinScale	d0,d5,a3
-			CosScale	d3,d5,a3
-			;d0 = z'
-			sub.w		d3,d0
-			move.w		d0,(10,a5)
-
-			move.w		(6,a4),d0
-			SinScale	d3,d5,a3
-			CosScale	d0,d5,a3
-			add.w		d3,d0
-			move.w		d0,(6,a5)
+			;save y
 			rts
 ***********************************************************
 *
@@ -136,10 +101,28 @@ dverts		move.w		(a1)+,d5
 			lsl.w		#SL,d4
 			lsl.w		#SL,d5
 
-			;lea			sin2,a3
-			;bsr			rotate_cube
-			;lea			coords2,a5
-			;movem.w		(a5)+,d0-d5
+			lea			coords_t,a4
+			movem.w		d0-d5,-(a4)
+			lea			coords,a4
+			lea			coords_t,a5
+			lea			sin2,a3
+			move.w		(a4),d0
+			move.w		(2,a4),d1
+			move.w		(8,a4),d2
+			bsr			rotate_y
+			move.w		d0,(a5)
+			move.w		d1,(2,a5)
+			move.w		d2,(8,a5)
+
+			move.w		(4,a4),d0
+			move.w		(6,a4),d1
+			move.w		(10,a4),d2
+			bsr			rotate_y
+			move.w		d0,(4,a5)
+			move.w		d1,(6,a5)
+			move.w		d2,(10,a5)
+
+			movem.w		(a5)+,d0-d5
 			; perspective
 
 			and.l		#$0000ffff,d0
@@ -164,6 +147,10 @@ dverts		move.w		(a1)+,d5
 			move.l		buf2,a0
 
 			bsr			blit_line
+
+			move.b		sinp,d5
+			add.b		#1,d5
+			move.b		d5,sinp
 
 			dbra		d7,dverts																					
 
@@ -208,7 +195,9 @@ buf2:		dc.l		0
 tmp:		dc.l		0
 
 coords:		dc.w		0,0,0,0,0,0
-coords2:	dc.w		0,0,0,0,0,0
+coords_t:	dc.w		0,0,0,0,0,0
+c_t:		dc.w		0,0,0,0,0,0
+
 
 points:		PointXYZ	-MAX, -MAX, -MAX
 			PointXYZ	MAX, -MAX, -MAX

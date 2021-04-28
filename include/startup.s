@@ -77,25 +77,6 @@ VertCount	MACRO
 			dc.w		\1
 			ENDM
 
-			;\1 = x||y; \2 = step, \3 = list
-SinScale	MACRO		\1, \2, \3
-			move.l		#0,d6
-			move.b		(\3,\2),d6
-			;lsl.w		#4,d6
-			muls		d6,\1
-			;add.l		\1,\1
-			;swap		\1
-			ENDM
-
-			;\1 = x||y; \2 = step, \3 = list
-CosScale	MACRO		\1, \2, \3
-			move.l		#0,d6
-			move.b		(128,\3,\2),d6
-			;lsl.w		#4,d6
-			muls		d6,\1
-			;add.l		\1,\1
-			;swap		\1
-			ENDM
 
 ***********************************************************
 * START
