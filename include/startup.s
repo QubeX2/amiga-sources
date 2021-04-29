@@ -56,12 +56,14 @@ PERSP2D:MACRO
 			ext.l		\1
 			ext.l		\2
 			neg.w		\3																	;world +z is forward,screen perspective is away
-			asr.w		#8,\3																;this scaling
+			asr.w		#8,\3
 			add.w		#78,\3																;and eye Z determines Field of View.
 			divs		\3,\1
 			divs		\3,\2
 			add.w		#320/2,\1															;center horizontally on the screen
 			add.w		#256/2,\2															;center vertically
+			and.l		#$0000ffff,\1
+			and.l		#$0000ffff,\2
 			ENDM
 
 

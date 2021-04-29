@@ -233,10 +233,10 @@ coplst:		dc.w		BPLCON0,$1200
 			dc.w		DIWSTOP,$2cc1																	;
 			dc.w		DDFSTRT,$0038
 			dc.w		DDFSTOP,$00d0	
-			dc.w		COLOR00,$0456
-			dc.w		COLOR01,$09bf
+			dc.w		COLOR00,$0654
+			dc.w		COLOR01,$0fb9
 			dc.w		COLOR02,$0f00
-			dc.w		COLOR03,$000f
+			dc.w		COLOR03,$0fff
 			dc.l		COPPER_HALT
 
 buf1:		dc.l		0
@@ -278,7 +278,7 @@ sin:
 ;variable:
 ;   name:x
 ;   startValue:1
-;   endValue:360
+;   endValue:720
 ;   step:1
 ;outputType(B,W,L): W
 ;outputInHex: true
@@ -322,7 +322,6 @@ sin:
 			dc.w		$ff84, $ff88, $ff8c, $ff90, $ff94, $ff98, $ff9c, $ffa0, $ffa4, $ffa8
 			dc.w		$ffad, $ffb1, $ffb5, $ffb9, $ffbe, $ffc2, $ffc6, $ffcb, $ffcf, $ffd4
 			dc.w		$ffd8, $ffdc, $ffe1, $ffe5, $ffea, $ffee, $fff3, $fff7, $fffc, $0000
-;@generated-datagen-end----------------
 			dc.w		$0004, $0009, $000d, $0012, $0016, $001b, $001f, $0024, $0028, $002c
 			dc.w		$0031, $0035, $003a, $003e, $0042, $0047, $004b, $004f, $0053, $0058
 			dc.w		$005c, $0060, $0064, $0068, $006c, $0070, $0074, $0078, $007c, $0080
@@ -359,7 +358,7 @@ sin:
 			dc.w		$ff84, $ff88, $ff8c, $ff90, $ff94, $ff98, $ff9c, $ffa0, $ffa4, $ffa8
 			dc.w		$ffad, $ffb1, $ffb5, $ffb9, $ffbe, $ffc2, $ffc6, $ffcb, $ffcf, $ffd4
 			dc.w		$ffd8, $ffdc, $ffe1, $ffe5, $ffea, $ffee, $fff3, $fff7, $fffc, $0000
-
+;@generated-datagen-end----------------
 
 
 
