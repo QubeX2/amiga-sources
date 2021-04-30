@@ -39,24 +39,44 @@ start:
 			move.w		#(DMAF_SETCLR!DMAF_COPPER!DMAF_BLITTER!DMAF_RASTER!DMAF_MASTER),DMACON(a6)
 			move.w		#(INTF_SETCLR!INTF_EXTER),INTENA(a6)
 
-			move.l		#bitp1b,buf1
-			move.l		#bitp1a,buf2
+            ; load buffers
+			lea			buffers,a0
+			move.l		#bitp1a,(a0)+
+			move.l		#bitp1b,(a0)+
+			move.l		#bitp2a,(a0)+
+			move.l		#bitp2b,(a0)+
+			move.l		#bitp3a,(a0)+
+			move.l		#bitp3b,(a0)+
+			move.l		#bitp4a,(a0)+
+			move.l		#bitp4b,(a0)+
+			move.l		#bitp5a,(a0)+
+			move.l		#bitp5b,(a0)+
+			move.l		#bitp6a,(a0)+
+			move.l		#bitp6b,(a0)+
 
 main:	WAITVB	main
 
-			CLRS		buf1
+			CLRS		buffers
 			lea			sin,a0
 			lea			points,a1
 			lea			coords,a2
 			bsr			rotate_points
-
 			bsr			inc_angles
-
+			
 			lea			lines,a1
 			lea			coords,a2
+			move.l		buffers,a3
 			bsr			draw_cube
+			bsr			load_copper
+			bsr			swap_buffers
 
-wait:	WAITVB2	wait
+
+			;move.l		buf2b,a0
+			;lea			lines,a1
+			;lea			coords,a2
+			;bsr			draw_cube
+
+wait:	    WAITVB2	wait
 
 			LMOUSE		main
 	
@@ -64,9 +84,32 @@ wait:	WAITVB2	wait
 
 ***********************************************************
 *
-ANGLE_X	equ	1
-ANGLE_Y	equ	2
-ANGLE_Z	equ	3
+load_copper:
+			move.l		#coplst,COP1LCH(a6)
+			move.l		buffers,BPL1PTH(a6)
+			move.l		buffers+4,BPL2PTH(a6)
+			move.l		buffers+8,BPL3PTH(a6)
+			move.l		buffers+12,BPL4PTH(a6)
+			move.l		buffers+16,BPL5PTH(a6)
+			move.l		buffers+20,BPL6PTH(a6)
+			move.w		COPJMP1(a6),d0
+			rts
+***********************************************************
+*
+BUF_COUNT	equ	6-1
+
+swap_buffers:
+			lea			buffers,a0
+			movem.l		(a0)+,d1-d7
+			move.l		d7,d0
+			movem.l		d0-d6,-(a0)
+			rts
+
+***********************************************************
+*
+ANGLE_X		equ	2
+ANGLE_Y		equ	1
+ANGLE_Z		equ	3
 inc_angles:
 			lea			sinpx,a0
 			movem.l		(a0)+,d0-d2
@@ -164,10 +207,6 @@ rotate_points:
 ***********************************************************
 *
 draw_cube:
-			move.l		buf1,tmp
-			move.l		buf2,buf1
-			move.l		tmp,buf2
-
 			lea			CUSTOM,a6
 
 			;vertcount
@@ -193,15 +232,11 @@ dverts:		move.w		(a1)+,d5
 			and.l		#$ffff,d3
 
 			move.l		#40,d4
-			move.l		buf2,a0
+			move.l		buffers,a0
 
 			bsr			blit_line
 
 			dbra		d7,dverts																					
-
-			move.l		#coplst,COP1LCH(a6)
-			move.l		buf1,BPL1PTH(a6)
-			move.w		COPJMP1(a6),d0
 			rts
 
 *****************************************************************************
@@ -214,7 +249,7 @@ sinpx:		dc.l		0
 sinpy:		dc.l		0
 sinpz:		dc.l		0
 
-coplst:		dc.w		BPLCON0,$1200	
+coplst:		dc.w		BPLCON0,$6200	
 			dc.w		BPLCON1,$0000
 			dc.w		BPLCON2,$0024																	;sprites have priority over playfields
 			dc.w		BPLCON3,$0000
@@ -225,18 +260,45 @@ coplst:		dc.w		BPLCON0,$1200
 			dc.w		DIWSTOP,$2cc1																	;
 			dc.w		DDFSTRT,$0038
 			dc.w		DDFSTOP,$00d0	
-			dc.w		COLOR00,$0654
-			dc.w		COLOR01,$0fb9
-			dc.w		COLOR02,$0f00
-			dc.w		COLOR03,$0fff
+			dc.w		COLOR00,$0006
+			dc.w		COLOR01,$0eef
+			dc.w		COLOR02,$0ddf
+			dc.w		COLOR03,$0ccf
+			dc.w		COLOR04,$0bbf
+			dc.w		COLOR05,$0aaf
+			dc.w		COLOR06,$099f
+			dc.w		COLOR07,$088f
+			dc.w		COLOR08,$077f
+			dc.w		COLOR09,$066f
+			dc.w		COLOR10,$055f
+			dc.w		COLOR11,$044f
+			dc.w		COLOR12,$033f
+			dc.w		COLOR13,$022f
+			dc.w		COLOR14,$011f
+			dc.w		COLOR15,$000f
+			dc.w		COLOR16,$000e
+			dc.w		COLOR17,$000d
+			dc.w		COLOR18,$000c
+			dc.w		COLOR19,$000b
+			dc.w		COLOR20,$000a
+			dc.w		COLOR21,$0009
+			dc.w		COLOR22,$0008
+			dc.w		COLOR23,$0007
+			dc.w		COLOR24,$0006
+			dc.w		COLOR25,$0005
+			dc.w		COLOR26,$0004
+			dc.w		COLOR27,$0003
+			dc.w		COLOR28,$0002
+			dc.w		COLOR29,$0001
+			dc.w		COLOR30,$0000
+			dc.w		COLOR31,$0fff
 			dc.l		COPPER_HALT
 
-buf1:		dc.l		0
-buf2:		dc.l		0
+buffers:	dcb.l		6*2,0
 tmp:		dc.l		0
 
-MAX		equ	20<<8
-PCOUNT	equ	8-1
+MAX			equ	18<<8
+PCOUNT		equ	8-1
 points:		PointXYZ	-MAX, -MAX, -MAX
 			PointXYZ	MAX, -MAX, -MAX
 			PointXYZ	MAX,  MAX, -MAX
@@ -248,7 +310,7 @@ points:		PointXYZ	-MAX, -MAX, -MAX
 
 coords:		dcb.w		8*2,0
 
-LCOUNT	equ	12-1
+LCOUNT		equ	12-1
 lines:		VertAB		0,3
 			VertAB		3,2
 			VertAB		2,1
@@ -371,9 +433,17 @@ sin:
 	;bytes per line * lines in playfield * nr of bitplanes
 
 bitp1a:		ds.b		40*256																			;40/4 = 10 long words per line
-bitp2a:		ds.b		40*256
 bitp1b:		ds.b		40*256																			;40/4 = 10 long words per line
+bitp2a:		ds.b		40*256
 bitp2b:		ds.b		40*256
+bitp3a:		ds.b		40*256																			;40/4 = 10 long words per line
+bitp3b:		ds.b		40*256																			;40/4 = 10 long words per line
+bitp4a:		ds.b		40*256
+bitp4b:		ds.b		40*256
+bitp5a:		ds.b		40*256
+bitp5b:		ds.b		40*256
+bitp6a:		ds.b		40*256
+bitp6b:		ds.b		40*256
 
 
 

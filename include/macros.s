@@ -17,7 +17,7 @@ WAITVB2		MACRO
 
 LMOUSE		MACRO
 			btst		#6,$bfe001
-			bne.s		\1
+			bne			\1
 			ENDM
 
 BLTWAIT		MACRO
@@ -35,6 +35,17 @@ CLRS		MACRO
 			move.l		#$13f,d7
 .s_l\@:		movem.l		d0-d4/a0-a2,-(a6)
 			dbra		d7,.s_l\@
+			ENDM
+
+			;\1 = sin, \2 = offset, \3 destination
+SinMuls		MACRO
+			muls		(\1,\2.w),\3
+			asr.l		#8,\3
+			ENDM
+
+CosMuls 	MACRO
+			muls		(90*2,\1,\2.w),\3
+			asr.l		#8,\3
 			ENDM
 
 ***********************************************************************************
@@ -61,7 +72,7 @@ PointXYZ	MACRO
 			ENDM
 
 VertAB		MACRO
-			dc.w		\1*6, \2*6
+			dc.w		\1*4, \2*4
 			ENDM
 
 VertCount	MACRO
