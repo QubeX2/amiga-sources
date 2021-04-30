@@ -39,6 +39,8 @@ start:
 			move.w		#(DMAF_SETCLR!DMAF_COPPER!DMAF_BLITTER!DMAF_RASTER!DMAF_MASTER),DMACON(a6)
 			move.w		#(INTF_SETCLR!INTF_EXTER),INTENA(a6)
 
+			bsr			setup_colors
+
             ; load buffers
 			lea			buffers,a0
 			move.l		#bitp1a,(a0)+
@@ -70,18 +72,38 @@ main:	WAITVB	main
 			bsr			load_copper
 			bsr			swap_buffers
 
-
-			;move.l		buf2b,a0
-			;lea			lines,a1
-			;lea			coords,a2
-			;bsr			draw_cube
-
 wait:	    WAITVB2	wait
 
 			LMOUSE		main
-	
 			rts
 
+***********************************************************
+*
+setup_colors:
+			lea			CUSTOM,a6
+			lea			colors,a0
+			moveq.l		#0,d0
+			move.w		#COLOR00,d0
+			swap		d0
+            ;background color
+			move.w		#$0002,d0
+			move.l		d0,(a0)+
+			move.l		#30-1,d7
+			move.l		#$0100,d1
+			move.w		#0,d0
+.setc:		add.l		#$00020000,d0
+			add.w		d1,d0
+			cmp.w		#$0f00,d0
+			bne			.setcn1
+			move.w		#$0010,d1
+.setcn1:	cmp.w		#$0f70,d0
+			bne			.setcn2
+			move.w		#$0012,d1
+.setcn2:	and.l		#$ffff0fff,d0
+			move.l		d0,(a0)+
+			dbra		d7,.setc
+			move.w		#$0fff,COLOR31(a6)
+			rts
 ***********************************************************
 *
 load_copper:
@@ -96,8 +118,6 @@ load_copper:
 			rts
 ***********************************************************
 *
-BUF_COUNT	equ	6-1
-
 swap_buffers:
 			lea			buffers,a0
 			movem.l		(a0)+,d1-d7
@@ -107,9 +127,9 @@ swap_buffers:
 
 ***********************************************************
 *
-ANGLE_X		equ	2
-ANGLE_Y		equ	1
-ANGLE_Z		equ	3
+ANGLE_X	equ	1
+ANGLE_Y	equ	2
+ANGLE_Z	equ	3
 inc_angles:
 			lea			sinpx,a0
 			movem.l		(a0)+,d0-d2
@@ -260,45 +280,14 @@ coplst:		dc.w		BPLCON0,$6200
 			dc.w		DIWSTOP,$2cc1																	;
 			dc.w		DDFSTRT,$0038
 			dc.w		DDFSTOP,$00d0	
-			dc.w		COLOR00,$0006
-			dc.w		COLOR01,$0eef
-			dc.w		COLOR02,$0ddf
-			dc.w		COLOR03,$0ccf
-			dc.w		COLOR04,$0bbf
-			dc.w		COLOR05,$0aaf
-			dc.w		COLOR06,$099f
-			dc.w		COLOR07,$088f
-			dc.w		COLOR08,$077f
-			dc.w		COLOR09,$066f
-			dc.w		COLOR10,$055f
-			dc.w		COLOR11,$044f
-			dc.w		COLOR12,$033f
-			dc.w		COLOR13,$022f
-			dc.w		COLOR14,$011f
-			dc.w		COLOR15,$000f
-			dc.w		COLOR16,$000e
-			dc.w		COLOR17,$000d
-			dc.w		COLOR18,$000c
-			dc.w		COLOR19,$000b
-			dc.w		COLOR20,$000a
-			dc.w		COLOR21,$0009
-			dc.w		COLOR22,$0008
-			dc.w		COLOR23,$0007
-			dc.w		COLOR24,$0006
-			dc.w		COLOR25,$0005
-			dc.w		COLOR26,$0004
-			dc.w		COLOR27,$0003
-			dc.w		COLOR28,$0002
-			dc.w		COLOR29,$0001
-			dc.w		COLOR30,$0000
-			dc.w		COLOR31,$0fff
+colors:		dcb.l		32,0
 			dc.l		COPPER_HALT
 
 buffers:	dcb.l		6*2,0
 tmp:		dc.l		0
 
-MAX			equ	18<<8
-PCOUNT		equ	8-1
+MAX		equ	18<<8
+PCOUNT	equ	8-1
 points:		PointXYZ	-MAX, -MAX, -MAX
 			PointXYZ	MAX, -MAX, -MAX
 			PointXYZ	MAX,  MAX, -MAX
@@ -310,7 +299,7 @@ points:		PointXYZ	-MAX, -MAX, -MAX
 
 coords:		dcb.w		8*2,0
 
-LCOUNT		equ	12-1
+LCOUNT	equ	12-1
 lines:		VertAB		0,3
 			VertAB		3,2
 			VertAB		2,1
