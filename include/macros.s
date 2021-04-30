@@ -37,26 +37,9 @@ CLRS		MACRO
 			dbra		d7,.s_l\@
 			ENDM
 
-            ; S,D,Sin,Cos -> D (S*Cos -  D*Sin)
-CosSubSin   MACRO       ;
-			ext.l		\2
-			ext.l		\1
-			muls.l		\3,\2
-			muls.l		\4,\1
-			sub.l		\1,\2
-			asr.l		#8,\2
-			ENDM
-
-            ; S,D,Sin,Cos -> D (S*Sin + D*Cos)
-CosAddSin   MACRO
-			ext.l		\2
-			ext.l		\1
-			muls.l		\3,\1
-			muls.l		\4,\2
-			add.l		\1,\2
-			asr.l		#8,\2
-			ENDM
-
+***********************************************************************************
+* x' = x / z + 1
+* y' = y / z + 1
 PERSP2D     MACRO			
 			;final projection from world to screen coords
 			ext.l		\1
