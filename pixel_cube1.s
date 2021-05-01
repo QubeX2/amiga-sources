@@ -48,7 +48,7 @@ start:
 .st:		move.l		(a1)+,(a0)+
 			dbra		d7,.st
 
-main:	WAITVB	main
+main:		WAITVB	main
 
 			CLRS		buffers
 			lea			sin,a0
