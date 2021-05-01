@@ -43,18 +43,10 @@ start:
 
             ; load buffers
 			lea			buffers,a0
-			move.l		#bitp1a,(a0)+
-			move.l		#bitp1b,(a0)+
-			move.l		#bitp2a,(a0)+
-			move.l		#bitp2b,(a0)+
-			move.l		#bitp3a,(a0)+
-			move.l		#bitp3b,(a0)+
-			move.l		#bitp4a,(a0)+
-			move.l		#bitp4b,(a0)+
-			move.l		#bitp5a,(a0)+
-			move.l		#bitp5b,(a0)+
-			move.l		#bitp6a,(a0)+
-			move.l		#bitp6b,(a0)+
+			lea			slist,a1
+			move.l		#BPL_COUNT,d7
+.st:		move.l		(a1)+,(a0)+
+			dbra		d7,.st
 
 main:	WAITVB	main
 
@@ -127,9 +119,9 @@ swap_buffers:
 
 ***********************************************************
 *
-ANGLE_X	equ	1
-ANGLE_Y	equ	2
-ANGLE_Z	equ	3
+ANGLE_X		equ	1
+ANGLE_Y		equ	2
+ANGLE_Z		equ	3
 inc_angles:
 			lea			sinpx,a0
 			movem.l		(a0)+,d0-d2
@@ -286,8 +278,8 @@ colors:		dcb.l		32,0
 buffers:	dcb.l		6*2,0
 tmp:		dc.l		0
 
-MAX		equ	18<<8
-PCOUNT	equ	8-1
+MAX			equ	18<<8
+PCOUNT		equ	8-1
 points:		PointXYZ	-MAX, -MAX, -MAX
 			PointXYZ	MAX, -MAX, -MAX
 			PointXYZ	MAX,  MAX, -MAX
@@ -299,7 +291,7 @@ points:		PointXYZ	-MAX, -MAX, -MAX
 
 coords:		dcb.w		8*2,0
 
-LCOUNT	equ	12-1
+LCOUNT		equ	12-1
 lines:		VertAB		0,3
 			VertAB		3,2
 			VertAB		2,1
@@ -411,8 +403,11 @@ sin:
 
 
 
-
-
+BPL_COUNT	equ	12-1
+slist:		
+			dc.l		bitp1a, bitp1b, bitp2a, bitp2b 
+			dc.l		bitp3a, bitp3b, bitp4a, bitp4b 
+			dc.l		bitp5a, bitp5b, bitp6a, bitp6b 
 
 *****************************************************************************
 * SCREEN
